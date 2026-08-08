@@ -93,6 +93,11 @@ function openChatSession(partnerUsername) {
     loadLocalMessages();
     loadCustomBackground();
     checkUnknownUserBar(partnerUsername);
+
+    // Mobil ekrandaysa sohbet penceresini görünür yap
+    if (window.innerWidth <= 768) {
+        document.getElementById('mainChat').style.display = 'flex';
+    }
 }
 
 /* KİŞİ EKLE & ENGELLE BARI KONTROLÜ */

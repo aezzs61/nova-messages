@@ -129,3 +129,115 @@ body { background-color: var(--bg-dark); color: var(--text-color); height: 100vh
 
 .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; background: #000; height: 200px; }
 video { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+
+/* ==========================================
+   MOBİL VE TABLET UYUMU (RESPONSIVE @MEDIA)
+   ========================================== */
+
+@media screen and max-width: 768px {
+    /* Ana kapsayıcıyı dikey akışa al */
+    .app-container {
+        flex-direction: column;
+        position: relative;
+    }
+
+    /* Sol en dar gezinti çubuğunu alta yatay bar yap */
+    .nav-sidebar {
+        width: 100vw;
+        height: 50px;
+        border-right: none;
+        border-top: 1px solid #2a3942;
+        flex-direction: row;
+        padding: 0 15px;
+        order: 3; /* En alta sabitle */
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 80;
+        background: var(--nav-bg);
+    }
+
+    .nav-top, .nav-bottom {
+        flex-direction: row;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    /* Sol sohbet listesi ve sağ ana sohbet tam ekran yap */
+    .sidebar {
+        width: 100vw;
+        height: calc(100vh - 50px);
+        border-right: none;
+    }
+
+    .main-chat {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: calc(100vh - 50px);
+        z-index: 60;
+        /* Varsayılan olarak sohbet seçilmediğinde gizlenebilir */
+    }
+
+    /* Üst başlıklar ve butonları küçült */
+    .chat-header {
+        padding: 0 10px;
+    }
+
+    .chat-header-actions {
+        gap: 4px;
+    }
+
+    .chat-header-actions .icon-btn {
+        font-size: 0.95rem;
+        padding: 3px;
+    }
+
+    #dateSearchInput {
+        width: 100px;
+        font-size: 0.65rem;
+    }
+
+    /* Mesaj baloncuklarının mobilde genişliğini artır */
+    .message {
+        max-width: 85%;
+        font-size: 0.85rem;
+    }
+
+    /* Emoji / Sticker popup panelini mobile sığdır */
+    .emoji-picker-panel {
+        width: 90vw;
+        left: 5vw;
+        bottom: 60px;
+        height: 220px;
+    }
+
+    /* Giriş alanı ve ikonlar */
+    .chat-input-area {
+        padding: 8px 10px;
+    }
+
+    .chat-input-area input {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+
+    .send-btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .unknown-user-bar {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+        padding: 8px 12px;
+    }
+}
