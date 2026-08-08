@@ -26,9 +26,20 @@ window.addEventListener('DOMContentLoaded', () => {
 
 /* WEBSOCKET BAĞLANTISI VE GELEN MESAJ İŞLEME */
 function connectWS(onOpenCallback) {
-    ws = new WebSocket('ws://localhost:8080');
+    // Sayfa HTTPS (Render) ise wss://, HTTP (Localhost) ise ws:// kullan
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host; // Render'ın kendi domaini ve portunu otomatik alır
+    
+    // Eğer bilgisayarında çalışıyorsan localhost:8080'e, Render'daysan Render adresine bağlanır
+    const wsUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'ws://localhost:8080'
+        : `${protocol}//${host}`;
+
+    console.log("Bağlanılan Soket Adresi:", wsUrl);
+    ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
+        console.log("WebSocket Bağlantısı Başarılı!");
         if (onOpenCallback) onOpenCallback();
     };
 
