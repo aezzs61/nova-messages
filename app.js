@@ -315,10 +315,22 @@ function switchTab(method) {
 
 function requestCode() {
     const target = document.getElementById('targetInput').value.trim();
-    if (!target) return alert("Lütfen alan doldurun!");
-    connectWS(() => {
-        ws.send(JSON.stringify({ type: 'request-code', method: currentMethod, target: target }));
-    });
+    if (!target) return alert("Lütfen E-posta veya Telefon numarası girin!");
+
+    const sendPayload = () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'request-code', method: currentMethod, target: target }));
+        } else {
+            console.error("WebSocket henüz hazır değil!");
+        }
+    };
+
+    // Eğer WebSocket bağlı değilse veya kapalıysa yeniden bağlanıp gönder
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+        connectWS(sendPayload);
+    } else {
+        sendPayload();
+    }
 }
 
 function verifyCode() {
