@@ -1,12 +1,20 @@
+const express = require('express');
+const http = require('http');
 const { WebSocketServer } = require('ws');
+const path = require('path');
 
-const wss = new WebSocketServer({ port: 8080 });
-const clients = new Map();       // username -> ws
-const pendingCodes = new Map();  // target -> { code, expires }
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
 
-console.log("==========================================");
-console.log(" Nova Messages Sunucusu 8080 Portunda Aktif");
-console.log("==========================================");
+// Statik dosyaları (index.html, app.js, style.css vb.) dışarı aç
+app.use(express.static(path.join(__dirname, './')));
+
+const clients = new Map();
+const pendingCodes = new Map();
+
+// Render'ın dinamik atadığı portu kullan, yoksa 8080
+const PORT = process.env.PORT || 8080;
 
 wss.on('connection', (ws) => {
     let currentUsername = null;
@@ -16,49 +24,53 @@ wss.on('connection', (ws) => {
             const data = JSON.parse(message);
 
             switch (data.type) {
-                // 1. KOD İSTEĞİ (E-posta/Tel No)
                 case 'request-code': {
                     const code = Math.floor(100000 + Math.random() * 900000).toString();
                     pendingCodes.set(data.target, { code, expires: Date.now() + 120000 });
 
-                    console.log("\n========================================");
-                    console.log(`GİRİŞ TİPİ : ${data.method.toUpperCase()}`);
-                    console.log(`HEDEF     : ${data.target}`);
-                    console.log(`GİRİŞ KODU: ${code}`);
-                    console.log("========================================\n");
+                    console.log(`\n========================================`);
+                    console.log(`GİRİŞ KODU (${data.target}): ${code}`);
+                    console.log(`========================================\n`);
 
                     ws.send(JSON.stringify({ type: 'code-sent', target: data.target }));
                     break;
                 }
 
-                // 2. KOD DOĞRULAMA
                 case 'verify-code': {
                     const record = pendingCodes.get(data.target);
                     if (record && record.code === data.code && Date.now() < record.expires) {
                         pendingCodes.delete(data.target);
                         ws.send(JSON.stringify({ type: 'code-verified', target: data.target }));
-                        console.log(`[KOD DOĞRULANDI] ${data.target}`);
                     } else {
                         ws.send(JSON.stringify({ type: 'login-failed', reason: 'Geçersiz veya süresi dolmuş kod!' }));
                     }
                     break;
                 }
 
-                // 3. KULLANICI ADI İLE KAYIT VE OTURUM AÇMA
                 case 'register-username': {
                     currentUsername = data.username;
                     clients.set(currentUsername, ws);
-                    console.log(`[AKTİF KULLANICI] Hesabı: ${data.account} -> Kullanıcı Adı: ${currentUsername}`);
                     break;
                 }
 
-                // ANLIK MESAJLAŞMA (Kullanıcı adları üzerinden gönderilir)
                 case 'chat-message':
                     sendToUser(data.targetId, {
                         type: 'chat-message',
                         senderId: currentUsername,
                         text: data.text,
-                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        msgId: data.msgId,
+                        timestamp: data.timestamp,
+                        isSticker: data.isSticker
+                    });
+                    break;
+
+                case 'edit-message':
+                    sendToUser(data.targetId, {
+                        type: 'edit-message',
+                        senderId: currentUsername,
+                        msgId: data.msgId,
+                        newText: data.newText
                     });
                     break;
 
@@ -84,3 +96,7 @@ function sendToUser(targetId, payload) {
         targetWs.send(JSON.stringify(payload));
     }
 }
+
+server.listen(PORT, () => {
+    console.log(`Nova Messages Sunucusu ${PORT} portunda aktif...`);
+});
