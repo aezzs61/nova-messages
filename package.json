@@ -1,17 +1,13 @@
 {
   "name": "nova-messages",
   "version": "1.0.0",
-  "description": "Nova Messages Chat Application",
-  "main": "main.js",
+  "description": "Nova Messages Realtime Chat App",
+  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "electron": "electron ."
+    "start": "node server.js"
   },
   "dependencies": {
-    "nodemailer": "^6.9.0",
-    "ws": "^8.13.0"
-  },
-  "devDependencies": {
-    "electron": "^28.3.3"
+    "express": "^4.22.2",
+    "ws": "^8.21.3"
   }
 }
