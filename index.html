@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Messages</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- GİRİŞ MODALI -->
+    <div id="authModal" class="auth-container">
+        <div class="auth-box">
+            <h2 class="auth-title"><i class="fa-solid fa-paper-plane"></i> Nova Messages</h2>
+            <p class="auth-subtitle" id="modalSubtitle">Giriş Yap veya Kaydol</p>
+            
+            <div id="stepRequest">
+                <div class="auth-tabs">
+                    <button id="tabEmail" class="tab-btn active" onclick="switchTab('email')"><i class="fa-solid fa-envelope"></i> E-posta</button>
+                    <button id="tabPhone" class="tab-btn" onclick="switchTab('phone')"><i class="fa-solid fa-phone"></i> Telefon No</button>
+                </div>
+                <input type="text" id="targetInput" placeholder="E-posta adresi..." class="input-field">
+                <button onclick="requestCode()" class="action-btn">Kod Gönder</button>
+            </div>
+
+            <div id="stepVerify" style="display: none;">
+                <input type="text" id="codeInput" placeholder="6 Haneli Kod" maxlength="6" class="input-field">
+                <button onclick="verifyCode()" class="action-btn">Kodu Doğrula</button>
+            </div>
+
+            <div id="stepUsername" style="display: none;">
+                <input type="text" id="usernameInput" placeholder="kullanici adi" class="input-field">
+                <button onclick="saveUsernameAndEnter()" class="action-btn">Profil Tamamla ve Giriş Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANA UYGULAMA ALANI -->
+    <div class="app-container">
+        
+        <!-- EN SOL GEZİNTİ ÇUBUĞU -->
+        <div class="nav-sidebar">
+            <div class="nav-top">
+                <button class="nav-btn active" id="navChats" title="Sohbetler" onclick="switchNav('chats')"><i class="fa-solid fa-message"></i></button>
+                <button class="nav-btn" id="navFavorites" title="Favoriler" onclick="switchNav('favorites')"><i class="fa-solid fa-star"></i></button>
+                <button class="nav-btn" id="navStatus" title="Durum" onclick="switchNav('status')"><i class="fa-solid fa-circle-notch"></i></button>
+                <button class="nav-btn" id="navGroups" title="Topluluklar & Gruplar" onclick="switchNav('groups')"><i class="fa-solid fa-users"></i></button>
+                <button class="nav-btn" id="navStorage" title="Veri & Depolama Sihirbazı" onclick="switchNav('storage')"><i class="fa-solid fa-hard-drive"></i></button>
+                <button class="nav-btn" id="navSettings" title="Gizlilik & Güvenlik" onclick="switchNav('settings')"><i class="fa-solid fa-shield-halved"></i></button>
+            </div>
+            <div class="nav-bottom">
+                <button class="nav-btn" title="Çıkış Yap" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </div>
+
+        <!-- SOL DİNAMİK LİSTE -->
+        <div class="sidebar">
+            <div class="header">
+                <h3>Nova Messages</h3>
+                <span id="myUserIdDisplay"></span>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="targetUserSearch" placeholder="Aratın veya kullanıcı adı yazın..." oninput="filterChatList(this.value)">
+            </div>
+
+            <div class="chat-filters" id="chatFilters">
+                <button class="filter-btn active" onclick="filterChats('all')">Tümü</button>
+                <button class="filter-btn" onclick="filterChats('unread')">Okunmamış</button>
+                <button class="filter-btn" onclick="filterChats('contacts')">Kişiler</button>
+                <button class="filter-btn" onclick="filterChats('groups')">Gruplar</button>
+            </div>
+
+            <div id="panelChats" class="side-panel active">
+                <div class="self-chat-item" onclick="openChatSession(myUsername)">
+                    <div class="avatar my-avatar"><i class="fa-solid fa-user"></i></div>
+                    <div class="chat-info">
+                        <strong>Kendim (Not Alanı)</strong>
+                        <span>Notlar, linkler ve medya saklayın</span>
+                    </div>
+                </div>
+                <!-- KAYITLI KİŞİLER VE SOHBET GEÇMİŞİ SATIRLARI -->
+                <div class="chat-list" id="chatList"></div>
+            </div>
+
+            <div id="panelFavorites" class="side-panel" style="display: none;">
+                <div class="favorites-section">
+                    <h4><i class="fa-solid fa-star text-warning"></i> Favori Kişiler</h4>
+                    <p class="empty-msg">Sık görüştüğünüz kişilere buradan hızlıca ulaşın.</p>
+                </div>
+            </div>
+
+            <div id="panelStatus" class="side-panel" style="display: none;">
+                <div class="status-section">
+                    <div class="my-status">
+                        <div class="avatar status-avatar"><i class="fa-solid fa-plus"></i></div>
+                        <div class="status-info">
+                            <strong>Durumum</strong>
+                            <span>Sesli veya görsel durum ekle</span>
+                        </div>
+                    </div>
+                    <button class="audio-status-btn" onclick="addAudioStatus()"><i class="fa-solid fa-microphone"></i> 30 Sn Sesli Durum Paylaş</button>
+                    <div class="status-title">GÜNCELLEMELER</div>
+                    <p class="empty-msg">Henüz durum güncellemesi yok.</p>
+                </div>
+            </div>
+
+            <div id="panelGroups" class="side-panel" style="display: none;">
+                <div class="groups-section">
+                    <button class="new-group-btn" onclick="createCommunity()"><i class="fa-solid fa-users-rectangle"></i> Yeni Topluluk Oluştur (1024 Kişi)</button>
+                    <p class="empty-msg">Bağlı olduğunuz topluluk yok.</p>
+                </div>
+            </div>
+
+            <div id="panelStorage" class="side-panel" style="display: none;">
+                <div class="storage-section">
+                    <h4><i class="fa-solid fa-sliders"></i> Veri & Depolama Ayarları</h4>
+                    <label class="setting-item">
+                        <input type="checkbox" id="dataSaverOption" onchange="toggleDataSaver()">
+                        Görüşmelerde Daha Az Veri Kullan (%50 Tasarruf)
+                    </label>
+                    <label class="setting-item">
+                        <input type="checkbox" id="autoDownloadOption" onchange="toggleAutoDownload()">
+                        Medya Otomatik İndirmesini Kapat
+                    </label>
+                    <hr class="panel-hr">
+                    <h4><i class="fa-solid fa-database"></i> Depolama Temizliği</h4>
+                    <button class="clean-btn" onclick="cleanStorage('large')"><i class="fa-solid fa-trash-can"></i> Büyük Videoları Temizle</button>
+                    <button class="clean-btn secondary" onclick="exportChatToEmail()"><i class="fa-solid fa-file-export"></i> Sohbeti E-Posta ile Yedekle (.txt)</button>
+                </div>
+            </div>
+
+            <div id="panelSettings" class="side-panel" style="display: none;">
+                <div class="settings-section">
+                    <h4><i class="fa-solid fa-lock"></i> Gizlilik & Güvenlik</h4>
+                    <label class="setting-item"><input type="checkbox" id="hideOnline"> Çevrimdışı Gizleme (Son görülme)</label>
+                    <label class="setting-item"><input type="checkbox" id="hideReadReceipts"> Okundu Bilgisi (Mavi Tık Kapat)</label>
+                    <label class="setting-item"><input type="checkbox" id="silenceUnknown"> Bilinmeyen Numaraları Sessize Al</label>
+                    <button class="pin-btn" onclick="setup2FA()"><i class="fa-solid fa-key"></i> İki Adımlı Doğrulama PIN Ekle</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ ANA SOHBET PENCERESİ -->
+        <div class="main-chat" id="mainChat">
+            <div class="chat-header">
+                <div class="avatar" id="chatAvatar"><i class="fa-solid fa-user"></i></div>
+                <div class="user-details">
+                    <span class="username" id="chatTitle">Sohbet Seçin</span>
+                    <span class="status" id="userOnlineStatus">çevrimiçi</span>
+                </div>
+
+                <div class="chat-header-actions">
+                    <input type="date" id="dateSearchInput" title="Tarihe Göre Arama Yap" onchange="searchChatByDate(this.value)">
+                    <button class="icon-btn" title="Ortak Medya & Bağlantıları Gör" onclick="openMediaGallery()"><i class="fa-solid fa-photo-film"></i></button>
+                    <button class="icon-btn" title="Kişiye Özel Duvar Kağıdı" onclick="changeCustomBg()"><i class="fa-solid fa-image"></i></button>
+                    <button class="icon-btn" title="Özel Bildirim Sesi" onclick="setCustomNotificationSound()"><i class="fa-solid fa-bell"></i></button>
+                    <button class="icon-btn" title="Masaüstü Kısayolu Ekle" onclick="createDesktopShortcut()"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+                    <button class="icon-btn" title="Görüntülü Arama" onclick="startCall('video')"><i class="fa-solid fa-video"></i></button>
+                    <button class="icon-btn" title="Sesli Arama" onclick="startCall('audio')"><i class="fa-solid fa-phone"></i></button>
+                </div>
+
+                <div id="pinnedMsgBar" class="pinned-bar" style="display:none;">
+                    <i class="fa-solid fa-thumbtack"></i> <span id="pinnedText">Sabitlenmiş mesaj</span>
+                </div>
+            </div>
+
+            <!-- TANINMAYAN KİŞİ İÇİN KİŞİ EKLE / ENGELLE BARI -->
+            <div id="unknownUserBar" class="unknown-user-bar" style="display: none;">
+                <span>Bu kişi rehberinizde ekli değil.</span>
+                <div class="unknown-actions">
+                    <button class="add-contact-btn" onclick="addActiveToContacts()"><i class="fa-solid fa-user-plus"></i> Kişi Ekle</button>
+                    <button class="block-contact-btn" onclick="blockActiveUser()"><i class="fa-solid fa-ban"></i> Engelle</button>
+                </div>
+            </div>
+
+            <div id="videoContainer" class="video-grid" style="display: none;">
+                <video id="localVideo" autoplay playsinline muted></video>
+                <video id="remoteVideo" autoplay playsinline></video>
+            </div>
+
+            <div class="messages-container" id="messagesContainer"></div>
+
+            <!-- POPUP EMOJİ, STİCKER VE GIF PANELİ -->
+            <div id="emojiPickerPanel" class="emoji-picker-panel" style="display: none;">
+                <div class="emoji-panel-header">
+                    <button class="emoji-tab-btn active" onclick="switchEmojiTab('emojis')">😀 Emojiler</button>
+                    <button class="emoji-tab-btn" onclick="switchEmojiTab('stickers')">🎨 Çıkartmalar</button>
+                    <button class="emoji-tab-btn" onclick="switchEmojiTab('gifs')">🎬 GIF'ler</button>
+                </div>
+                <div class="emoji-panel-body">
+                    <div id="tabContentEmojis" class="emoji-tab-content">
+                        <span class="emoji-item" onclick="insertEmoji('😀')">😀</span>
+                        <span class="emoji-item" onclick="insertEmoji('😂')">😂</span>
+                        <span class="emoji-item" onclick="insertEmoji('😍')">😍</span>
+                        <span class="emoji-item" onclick="insertEmoji('😎')">😎</span>
+                        <span class="emoji-item" onclick="insertEmoji('👍')">👍</span>
+                        <span class="emoji-item" onclick="insertEmoji('🔥')">🔥</span>
+                        <span class="emoji-item" onclick="insertEmoji('❤️')">❤️</span>
+                        <span class="emoji-item" onclick="insertEmoji('🎉')">🎉</span>
+                        <span class="emoji-item" onclick="insertEmoji('🙏')">🙏</span>
+                        <span class="emoji-item" onclick="insertEmoji('🚀')">🚀</span>
+                        <span class="emoji-item" onclick="insertEmoji('⚽')">⚽</span>
+                        <span class="emoji-item" onclick="insertEmoji('💯')">💯</span>
+                    </div>
+
+                    <div id="tabContentStickers" class="emoji-tab-content" style="display: none;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" class="sticker-thumb" onclick="sendDirectSticker(this.src)" title="Love Sticker" />
+                        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712010.png" class="sticker-thumb" onclick="sendDirectSticker(this.src)" title="Cat Sticker" />
+                        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png" class="sticker-thumb" onclick="sendDirectSticker(this.src)" title="Cool Sticker" />
+                        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712009.png" class="sticker-thumb" onclick="sendDirectSticker(this.src)" title="Happy Sticker" />
+                    </div>
+
+                    <div id="tabContentGifs" class="emoji-tab-content" style="display: none;">
+                        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z2YTZqY2k4Z3BxdGJzbWZvaTFlOTc5amxyd3JtdnFtdWVwMnBnOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0AM2057L4WGm370c/giphy.gif" class="gif-thumb" onclick="sendDirectSticker(this.src)" title="Dance GIF" />
+                        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmVtdW4zbTRmNWhxZWdsaWZsdmlsbThsZmV1bHRjMXdvdDhhYnc3bCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKsjRrfIPjeiVyM/giphy.gif" class="gif-thumb" onclick="sendDirectSticker(this.src)" title="Thumbs Up GIF" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- MESAJ GİRİŞ VE ENTER İLE GÖNDER SEÇENEĞİ -->
+            <div class="chat-input-container">
+                <div class="chat-input-area">
+                    <button class="icon-btn" title="Emoji, Çıkartma ve GIF Paneli" onclick="toggleEmojiPicker()"><i class="fa-solid fa-face-smile"></i></button>
+                    <input type="text" id="messageInput" placeholder="Mesaj yazın..." onkeydown="handleKeyPress(event)">
+                    <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+                <div class="input-options">
+                    <label><input type="checkbox" id="sendOnEnterCheck" checked> Enter tuşu mesajı göndersin</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEDYA MODALI -->
+    <div id="mediaModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <h3><i class="fa-solid fa-photo-film"></i> Paylaşılan Medya & Bağlantılar</h3>
+            <div id="mediaListContainer" class="media-list"></div>
+            <button class="action-btn" onclick="document.getElementById('mediaModal').style.display='none'">Kapat</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
