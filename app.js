@@ -96,6 +96,7 @@ function connectWS(onOpenCallback) {
 }
 
 /* SOHBETİ AÇMA VE BİLİNMEYEN KİŞİ KONTROLÜ */
+/* SOHBET AÇILDIĞINDA MOBİLDE SAĞ SOHBETİ EKRANA GETİR */
 function openChatSession(partnerUsername) {
     activeChatPartner = partnerUsername;
     document.getElementById('targetUserSearch').value = partnerUsername;
@@ -105,11 +106,13 @@ function openChatSession(partnerUsername) {
     loadCustomBackground();
     checkUnknownUserBar(partnerUsername);
 
-    // Mobil ekrandaysa sohbet penceresini görünür yap
+    // Mobil ekrandaysak sohbet ekranını görünür yap
     if (window.innerWidth <= 768) {
         document.getElementById('mainChat').style.display = 'flex';
     }
 }
+
+
 
 /* KİŞİ EKLE & ENGELLE BARI KONTROLÜ */
 function checkUnknownUserBar(username) {
@@ -196,6 +199,12 @@ function handleKeyPress(e) {
     if (e.key === 'Enter' && sendOnEnter) {
         e.preventDefault();
         sendMessage();
+    }
+}
+
+function closeChatSession() {
+    if (window.innerWidth <= 768) {
+        document.getElementById('mainChat').style.display = 'none';
     }
 }
 
@@ -310,6 +319,8 @@ function switchNav(panelName) {
 
     document.getElementById(`nav${panelName.charAt(0).toUpperCase() + panelName.slice(1)}`).classList.add('active');
     document.getElementById(`panel${panelName.charAt(0).toUpperCase() + panelName.slice(1)}`).style.display = 'block';
+
+    closeChatSession(); // Sohbet ekranı açıksa kapatır
 }
 
 function filterChats(filterType) {

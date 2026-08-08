@@ -145,73 +145,119 @@ video { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
 /* ==========================================
    MOBİL DÜZEN (@media SÖZDİZİMİ DÜZELTİLDİ)
    ========================================== */
+/* ==========================================
+   KESİN MOBİL ARAYÜZ VE DÜZENLEME KODLARI
+   ========================================== */
+
 @media screen and (max-width: 768px) {
+    /* Ana kapsayıcı ekranı tam kaplasın */
     .app-container {
+        display: flex;
         flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
         position: relative;
     }
 
+    /* Sol En Alt Gezinti Barı */
     .nav-sidebar {
         width: 100vw;
-        height: 50px;
+        height: 55px;
         border-right: none;
         border-top: 1px solid #2a3942;
         flex-direction: row;
-        padding: 0 15px;
+        padding: 0 5px;
         position: fixed;
         bottom: 0;
         left: 0;
-        z-index: 80;
+        z-index: 100;
         background: var(--nav-bg);
     }
 
     .nav-top, .nav-bottom {
         flex-direction: row;
-        gap: 15px;
+        gap: 0;
         align-items: center;
+        justify-content: space-around;
+        width: 100%;
     }
 
+    .nav-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+
+    /* Sol Sohbet Listesi Paneli */
     .sidebar {
-        width: 100vw;
-        height: calc(100vh - 50px);
+        width: 100vw !important;
+        height: calc(100vh - 55px) !important;
         border-right: none;
-    }
-
-    .main-chat {
-        position: fixed;
+        display: flex; /* Mobilde varsayılan olarak liste açık */
+        flex-direction: column;
+        position: absolute;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: calc(100vh - 50px);
-        z-index: 60;
+        z-index: 10;
+        background: #111b21;
     }
 
+    /* Sağ Ana Sohbet Alanı */
+    .main-chat {
+        width: 100vw !important;
+        height: calc(100vh - 55px) !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 20;
+        display: none; /* İlk açılışta tamamen gizli */
+        background: #0b141a;
+    }
+
+    /* Mobil Giriş Modalı */
+    .auth-container {
+        z-index: 9999 !important;
+    }
+
+    /* Üst Başlık Elemanları Sıralaması */
     .chat-header {
-        padding: 0 8px;
+        padding: 0 5px;
+        gap: 4px;
     }
 
     .chat-header-actions {
+        display: flex;
         gap: 2px;
     }
 
     .chat-header-actions .icon-btn {
         font-size: 0.85rem;
-        padding: 2px;
+        padding: 4px;
     }
 
     #dateSearchInput {
-        width: 80px;
-        font-size: 0.6rem;
+        display: none; /* Mobilde yer kaplamaması için tarihi gizle */
     }
 
-    .message {
-        max-width: 85%;
+    /* Mobilde Sol Üstteki Geri Ok Butonu */
+    .back-to-list-btn {
+        display: inline-block !important;
+        font-size: 1.2rem;
+        color: #e9edef;
+        padding: 0 8px;
+        cursor: pointer;
     }
 
     .emoji-picker-panel {
-        width: 90vw;
-        left: 5vw;
+        width: 92vw;
+        left: 4vw;
         bottom: 65px;
         height: 220px;
     }
+}
+
+/* Masaüstü Ekranlarda Geri Ok Butonunu Gizle */
+.back-to-list-btn {
+    display: none;
 }
